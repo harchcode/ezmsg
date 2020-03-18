@@ -1,0 +1,56 @@
+{
+  "name": "ezmsg-js",
+  "version": "0.0.1",
+  "description": "",
+  "repository": {},
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "npm run build:web && npm run build:node",
+    "build:web": "rm -rf build-web/dist && tsc src/web/index.ts --outDir build-web/dist --declaration",
+    "build:node": "rm -rf build-node/dist && tsc src/node/index.ts --outDir build-node/dist --declaration",
+    "test": "npm run test:web && npm run test:node",
+    "test:web": "NODE_ENV=test-web ava './test/**/*ts' --verbose",
+    "test:node": "NODE_ENV=test-node ava './test/**/*ts' --verbose",
+    "lint": "eslint './{src,test}/**/*.{js,ts}'",
+    "benchmark": "ts-node benchmark/index.ts"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run lint && npm test"
+    }
+  },
+  "ava": {
+    "extensions": [
+      "ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ]
+  },
+  "license": "MIT",
+  "keywords": [
+    "buffer",
+    "data",
+    "transfer",
+    "REST",
+    "API",
+    "JSON",
+    "binary"
+  ],
+  "devDependencies": {
+    "@types/benchmark": "^1.0.31",
+    "@typescript-eslint/eslint-plugin": "^2.22.0",
+    "@typescript-eslint/parser": "^2.22.0",
+    "ava": "^3.5.0",
+    "benchmark": "^2.1.4",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "husky": "^4.2.3",
+    "prettier": "^1.19.1",
+    "ts-node": "^8.6.2",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {}
+}
