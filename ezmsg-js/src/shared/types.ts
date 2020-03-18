@@ -29,9 +29,6 @@ export interface BBufferInterface {
   write: (type: BType, offset: number, value: BValue) => number;
   read: (type: BType, offset: number) => [BValue, number];
   toArrayBuffer: () => ArrayBuffer;
-  slice: (start?: number, end?: number) => BBufferInterface;
-  set: (bBuffer: BBufferInterface, offset?: number) => void;
-  fill: (buffer: Uint8Array, offset?: number) => void;
 }
 
 export type CreateNewBufferFunc = (size: number) => BBufferInterface;

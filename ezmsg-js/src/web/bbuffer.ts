@@ -56,18 +56,6 @@ export class BBuffer implements BBufferInterface {
     return s + BSIZE[STR_SIZE_TYPE];
   };
 
-  slice(start = 0, end?: number): BBufferInterface {
-    return BBuffer.from(this.arr.slice(start, end));
-  }
-
-  set(bBuffer: BBuffer, offset?: number) {
-    this.arr.set(bBuffer.arr, offset);
-  }
-
-  fill(buffer: Uint8Array, offset?: number) {
-    this.arr.set(buffer, offset);
-  }
-
   write(type: BType, offset: number, value: BValue): number {
     if (type >= BType.U8 && type <= BType.F64) {
       this.dv[`set${BFuncKey[type]}`](offset, value as number);
@@ -83,7 +71,7 @@ export class BBuffer implements BBufferInterface {
 
       const typeSize = this.write(STR_SIZE_TYPE, offset, valueSize);
 
-      this.fill(encoded, offset + typeSize);
+      this.arr.set(encoded, offset + typeSize);
 
       return typeSize + valueSize;
     }
