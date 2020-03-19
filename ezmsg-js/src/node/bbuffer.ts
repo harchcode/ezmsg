@@ -3,10 +3,10 @@ import {
   BType,
   BValue,
   CreateNewBufferFunc,
-  CreateBufferFromFunc,
-  CalcStrSizeFunc
+  CreateBufferFromFunc
 } from '../shared/types';
 import { STR_SIZE_TYPE, BSIZE } from '../shared/constants';
+import { nextPowerOf2 } from '../shared/utils';
 
 const BFuncKey = [
   'UInt8',
@@ -41,23 +41,36 @@ export class BBuffer implements BBufferInterface {
     return result;
   };
 
-  static calcStrSize: CalcStrSizeFunc = (value: string) => {
-    return Buffer.byteLength(value) + BSIZE[STR_SIZE_TYPE];
-  };
+  expand(neededSize: number) {
+    const size = this.buffer.byteLength;
+
+    if (size >= neededSize) return;
+
+    const newSize = nextPowerOf2(neededSize);
+    const newBuffer = Buffer.allocUnsafe(newSize);
+
+    newBuffer.fill(this.buffer, 0);
+
+    this.buffer = newBuffer;
+  }
 
   write(type: BType, offset: number, value: BValue): number {
     if (type >= BType.U8 && type <= BType.F64) {
+      this.expand(offset + BSIZE[type]);
       this.buffer[`write${BFuncKey[type]}`](value as number, offset);
 
       return BSIZE[type];
     } else if (type === BType.BOOL) {
+      this.expand(offset + BSIZE[type]);
       this.buffer[`write${BFuncKey[type]}`](value ? 1 : 0, offset);
 
       return BSIZE[type];
     } else if (type === BType.STR) {
       const valueSize = Buffer.byteLength(value as string);
+      const typeSize = BSIZE[STR_SIZE_TYPE];
 
-      const typeSize = this.write(STR_SIZE_TYPE, offset, valueSize);
+      this.expand(offset + valueSize + typeSize);
+      this.write(STR_SIZE_TYPE, offset, valueSize);
 
       this.buffer.fill(
         value as string,

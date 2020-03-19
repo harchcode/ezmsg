@@ -9,10 +9,9 @@ import {
   BBufferInterface,
   BValue,
   BTypeObject,
-  BTypeArray,
-  CalcStrSizeFunc
+  BTypeArray
 } from './types';
-import { BSIZE, MAX_SIZE_TYPE } from './constants';
+import { MAX_SIZE_TYPE, INITIAL_BUFFER_SIZE } from './constants';
 
 function serializeArray(
   buffer: BBufferInterface,
@@ -84,43 +83,14 @@ function serializeValue(
   );
 }
 
-function countBufferSize(
-  value: BValueParam,
-  type: BTypeParam,
-  calcStrSize: CalcStrSizeFunc
-) {
-  if (!(typeof type === 'object')) {
-    if (type !== BType.STR) return BSIZE[type as BType];
-
-    return calcStrSize(value as string);
-  }
-
-  if (type.constructor === Array) {
-    return (value as BValueArray).reduce(
-      (acc, v) => acc + countBufferSize(v, type[0], calcStrSize),
-      BSIZE[MAX_SIZE_TYPE]
-    );
-  }
-
-  if (!value) return MAX_SIZE_TYPE;
-
-  return Object.keys(type as BValueObject).reduce(
-    (acc, k) => acc + countBufferSize(value[k], type[k], calcStrSize),
-    BSIZE[MAX_SIZE_TYPE]
-  );
-}
-
 export const createSerializer: CreateSerializerFunc = (
-  createNewBuffer: CreateNewBufferFunc,
-  calcStrSize: CalcStrSizeFunc
+  createNewBuffer: CreateNewBufferFunc
 ) => {
   return (value: BValueParam, type: BTypeParam) => {
-    const bufferSize = countBufferSize(value, type, calcStrSize);
+    const buffer = createNewBuffer(INITIAL_BUFFER_SIZE);
 
-    const buffer = createNewBuffer(bufferSize);
+    const size = serializeValue(buffer, value, type);
 
-    serializeValue(buffer, value, type);
-
-    return buffer.toArrayBuffer();
+    return buffer.toArrayBuffer().slice(0, size);
   };
 };

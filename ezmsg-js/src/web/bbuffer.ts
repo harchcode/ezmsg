@@ -3,10 +3,10 @@ import {
   BType,
   BValue,
   CreateNewBufferFunc,
-  CreateBufferFromFunc,
-  CalcStrSizeFunc
+  CreateBufferFromFunc
 } from '../shared/types';
 import { STR_SIZE_TYPE, BSIZE } from '../shared/constants';
+import { nextPowerOf2 } from '../shared/utils';
 
 const BFuncKey = [
   'Uint8',
@@ -42,35 +42,40 @@ export class BBuffer implements BBufferInterface {
     return new BBuffer(arrayBuffer);
   };
 
-  static calcStrSize: CalcStrSizeFunc = (value: string) => {
-    let s = value.length;
+  expand(neededSize: number) {
+    const size = this.arr.byteLength;
 
-    for (let i = value.length - 1; i >= 0; i--) {
-      const code = value.charCodeAt(i);
+    if (size >= neededSize) return;
 
-      if (code > 0x7f && code <= 0x7ff) s++;
-      else if (code > 0x7ff && code <= 0xffff) s += 2;
-      if (code >= 0xdc00 && code <= 0xdfff) i--;
-    }
+    const newSize = nextPowerOf2(neededSize);
+    const newBuffer = new ArrayBuffer(newSize);
+    const newArr = new Uint8Array(newBuffer);
+    const newDV = new DataView(newBuffer);
 
-    return s + BSIZE[STR_SIZE_TYPE];
-  };
+    newArr.set(this.arr, 0);
+
+    this.arr = newArr;
+    this.dv = newDV;
+  }
 
   write(type: BType, offset: number, value: BValue): number {
     if (type >= BType.U8 && type <= BType.F64) {
+      this.expand(offset + BSIZE[type]);
       this.dv[`set${BFuncKey[type]}`](offset, value as number);
 
       return BSIZE[type];
     } else if (type === BType.BOOL) {
+      this.expand(offset + BSIZE[type]);
       this.dv[`set${BFuncKey[type]}`](offset, value ? 1 : 0);
 
       return BSIZE[type];
     } else if (type === BType.STR) {
       const encoded = encoder.encode(value as string);
       const valueSize = encoded.byteLength;
+      const typeSize = BSIZE[STR_SIZE_TYPE];
 
-      const typeSize = this.write(STR_SIZE_TYPE, offset, valueSize);
-
+      this.expand(offset + valueSize + typeSize);
+      this.write(STR_SIZE_TYPE, offset, valueSize);
       this.arr.set(encoded, offset + typeSize);
 
       return typeSize + valueSize;
