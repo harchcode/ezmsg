@@ -10,6 +10,7 @@ import {
   BValueArray,
   BValueObject
 } from './types';
+import { readSize } from './utils';
 
 function deserializeArray(
   buffer: BBufferInterface,
@@ -18,7 +19,7 @@ function deserializeArray(
 ): [BValueArray, number] {
   let currentOffset = offset;
 
-  const [size, typeSize] = buffer.readSize(currentOffset);
+  const [size, typeSize] = readSize(buffer, currentOffset);
   currentOffset += typeSize;
 
   const result = [];
@@ -40,7 +41,7 @@ function deserializeObject(
 ): [BValueObject, number] {
   let currentOffset = offset;
 
-  const [size, typeSize] = buffer.readSize(currentOffset);
+  const [size, typeSize] = readSize(buffer, currentOffset);
 
   if (size === 0) return [null, typeSize];
 
