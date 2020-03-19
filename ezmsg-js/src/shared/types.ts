@@ -29,9 +29,7 @@ export interface BBufferInterface {
   write: (type: BType, offset: number, value: BValue) => number;
   read: (type: BType, offset: number) => [BValue, number];
   toArrayBuffer: () => ArrayBuffer;
-  slice: (start?: number, end?: number) => BBufferInterface;
-  set: (bBuffer: BBufferInterface, offset?: number) => void;
-  fill: (buffer: Uint8Array, offset?: number) => void;
+  expand: (neededSize: number) => void;
 }
 
 export type CreateNewBufferFunc = (size: number) => BBufferInterface;
@@ -39,8 +37,6 @@ export type CreateNewBufferFunc = (size: number) => BBufferInterface;
 export type CreateBufferFromFunc = (
   arrayBuffer: ArrayBuffer
 ) => BBufferInterface;
-
-export type CalcStrSizeFunc = (value: string) => number;
 
 export type SerializeFunc = (
   value: BValueParam,
@@ -53,8 +49,7 @@ export type DeserializeFunc = (
 ) => BValueParam;
 
 export type CreateSerializerFunc = (
-  createNewBuffer: CreateNewBufferFunc,
-  calcStrSize: CalcStrSizeFunc
+  createNewBuffer: CreateNewBufferFunc
 ) => SerializeFunc;
 
 export type CreateDeserializerFunc = (

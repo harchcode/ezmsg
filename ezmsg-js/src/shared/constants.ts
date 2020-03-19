@@ -1,6 +1,12 @@
-import { BType } from './types';
-
 export const BSIZE = [1, 2, 4, 1, 2, 4, 4, 8, 1, 0];
 
-export const MAX_SIZE_TYPE = BType.I32;
-export const STR_SIZE_TYPE = BType.I16;
+export const INITIAL_BUFFER_SIZE = 128;
+
+export const BITS_PER_BYTE = 8;
+export const SIZE_COUNT_BIT = 3;
+export const BYTE_1_WITH_SIZE_REST = BITS_PER_BYTE - SIZE_COUNT_BIT;
+export const BYTE_2_WITH_SIZE_REST = BITS_PER_BYTE * 2 - SIZE_COUNT_BIT;
+export const BYTE_4_WITH_SIZE_REST = BITS_PER_BYTE * 4 - SIZE_COUNT_BIT;
+export const BYTE_1_WITH_SIZE_LIMIT = 1 << BYTE_1_WITH_SIZE_REST;
+export const BYTE_2_WITH_SIZE_LIMIT = 1 << BYTE_2_WITH_SIZE_REST;
+export const BYTE_4_WITH_SIZE_LIMIT = 1 << BYTE_4_WITH_SIZE_REST;

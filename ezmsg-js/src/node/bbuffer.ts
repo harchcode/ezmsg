@@ -3,10 +3,10 @@ import {
   BType,
   BValue,
   CreateNewBufferFunc,
-  CreateBufferFromFunc,
-  CalcStrSizeFunc
+  CreateBufferFromFunc
 } from '../shared/types';
-import { STR_SIZE_TYPE, BSIZE } from '../shared/constants';
+import { BSIZE } from '../shared/constants';
+import { nextPowerOf2, writeSize, readSize } from '../shared/utils';
 
 const BFuncKey = [
   'UInt8',
@@ -41,37 +41,35 @@ export class BBuffer implements BBufferInterface {
     return result;
   };
 
-  static calcStrSize: CalcStrSizeFunc = (value: string) => {
-    return Buffer.byteLength(value) + BSIZE[STR_SIZE_TYPE];
-  };
+  expand(neededSize: number) {
+    const size = this.buffer.byteLength;
 
-  slice(start = 0, end?: number): BBufferInterface {
-    const tmp = this.buffer.slice(start, end);
+    if (size >= neededSize) return;
 
-    return BBuffer.from(tmp.buffer);
-  }
+    const newSize = nextPowerOf2(neededSize);
+    const newBuffer = Buffer.allocUnsafe(newSize);
 
-  set(bBuffer: BBuffer, offset?: number) {
-    this.buffer.set(bBuffer.buffer, offset);
-  }
+    newBuffer.fill(this.buffer, 0);
 
-  fill(buffer: Uint8Array, offset?: number) {
-    this.buffer.set(buffer, offset);
+    this.buffer = newBuffer;
   }
 
   write(type: BType, offset: number, value: BValue): number {
     if (type >= BType.U8 && type <= BType.F64) {
+      this.expand(offset + BSIZE[type]);
       this.buffer[`write${BFuncKey[type]}`](value as number, offset);
 
       return BSIZE[type];
     } else if (type === BType.BOOL) {
+      this.expand(offset + BSIZE[type]);
       this.buffer[`write${BFuncKey[type]}`](value ? 1 : 0, offset);
 
       return BSIZE[type];
     } else if (type === BType.STR) {
       const valueSize = Buffer.byteLength(value as string);
+      const typeSize = writeSize(this, offset, valueSize);
 
-      const typeSize = this.write(STR_SIZE_TYPE, offset, valueSize);
+      this.expand(offset + valueSize + typeSize);
 
       this.buffer.fill(
         value as string,
@@ -90,7 +88,7 @@ export class BBuffer implements BBufferInterface {
     } else if (type === BType.BOOL) {
       return [this.buffer[`read${BFuncKey[type]}`](offset) > 0, BSIZE[type]];
     } else if (type === BType.STR) {
-      const [valueSize, typeSize] = this.read(STR_SIZE_TYPE, offset);
+      const [valueSize, typeSize] = readSize(this, offset);
       const dataOffset = offset + typeSize;
 
       return [
