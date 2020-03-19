@@ -11,7 +11,7 @@ import {
   BTypeObject,
   BTypeArray
 } from './types';
-import { MAX_SIZE_TYPE, INITIAL_BUFFER_SIZE } from './constants';
+import { INITIAL_BUFFER_SIZE } from './constants';
 
 function serializeArray(
   buffer: BBufferInterface,
@@ -21,7 +21,7 @@ function serializeArray(
 ): number {
   let currentOffset = offset;
 
-  currentOffset += buffer.write(MAX_SIZE_TYPE, currentOffset, value.length);
+  currentOffset += buffer.writeSize(currentOffset, value.length);
 
   value.forEach(v => {
     currentOffset += serializeValue(buffer, v, type[0], currentOffset);
@@ -39,11 +39,7 @@ function serializeObject(
   let currentOffset = offset;
   const keys = Object.keys(type);
 
-  const typeSize = buffer.write(
-    MAX_SIZE_TYPE,
-    currentOffset,
-    value ? keys.length : 0
-  );
+  const typeSize = buffer.writeSize(currentOffset, value ? keys.length : 0);
 
   if (!value) return typeSize;
 
@@ -88,7 +84,6 @@ export const createSerializer: CreateSerializerFunc = (
 ) => {
   return (value: BValueParam, type: BTypeParam) => {
     const buffer = createNewBuffer(INITIAL_BUFFER_SIZE);
-
     const size = serializeValue(buffer, value, type);
 
     return buffer.toArrayBuffer().slice(0, size);

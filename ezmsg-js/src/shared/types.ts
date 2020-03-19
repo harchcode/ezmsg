@@ -27,7 +27,9 @@ export interface BTypeObject {
 
 export interface BBufferInterface {
   write: (type: BType, offset: number, value: BValue) => number;
+  writeSize: (offset: number, size: number) => number;
   read: (type: BType, offset: number) => [BValue, number];
+  readSize: (offset) => [number, number];
   toArrayBuffer: () => ArrayBuffer;
   expand: (neededSize: number) => void;
 }
