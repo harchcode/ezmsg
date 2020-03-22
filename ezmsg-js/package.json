@@ -1,14 +1,16 @@
 {
   "name": "ezmsg-js",
-  "version": "0.0.1",
-  "description": "",
-  "repository": {},
+  "version": "0.1.1",
+  "description": "Tiny data for the web.",
+  "repository": {
+    "url": "https://github.com/harchcode/ezmsg"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "npm run build:web && npm run build:node",
-    "build:web": "rm -rf build-web/dist && tsc src/web/index.ts --outDir build-web/dist --declaration",
-    "build:node": "rm -rf build-node/dist && tsc src/node/index.ts --outDir build-node/dist --declaration",
+    "publish:all": "ts-node build-script.ts",
+    "build:web": "rm -rf dist && tsc src/web/index.ts --outDir dist --declaration",
+    "build:node": "rm -rf dist && tsc src/node/index.ts --outDir dist --declaration",
     "test": "npm run test:web && npm run test:node",
     "test:web": "NODE_ENV=test-web ava './test/**/*ts' --verbose",
     "test:node": "NODE_ENV=test-node ava './test/**/*ts' --verbose",
@@ -40,10 +42,12 @@
   ],
   "devDependencies": {
     "@types/benchmark": "^1.0.31",
+    "@types/node": "^13.9.2",
     "@typescript-eslint/eslint-plugin": "^2.22.0",
     "@typescript-eslint/parser": "^2.22.0",
     "ava": "^3.5.0",
     "benchmark": "^2.1.4",
+    "chalk": "^3.0.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.10.0",
     "eslint-plugin-prettier": "^3.1.2",
