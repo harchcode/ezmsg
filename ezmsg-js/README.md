@@ -1,12 +1,1 @@
-# Installation
-Currently only available via npm.
-
-For browser JS, run `npm i ezmsg-web`.
-
-For NodeJS, you can also use `ezmsg-web`, but it is recommended to use the NodeJS version by running `npm i ezmsg-node`.
-
-# Usage
-_Coming soon_
-
-# Example
-_Coming soon_
+Please visit [this guide](https://libezmsg.netlify.com/guide/js/), or visit [this guide](https://libezmsg.netlify.com/guide/node/) if you are using it for NodeJS.
